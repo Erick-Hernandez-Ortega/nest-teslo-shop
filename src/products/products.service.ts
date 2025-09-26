@@ -1,5 +1,5 @@
 import { CreateProductDto } from './dto/create-product.dto';
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
@@ -30,8 +30,12 @@ export class ProductsService {
     return await this.productRepository.find({});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    const product: Product | null = await this.productRepository.findOneBy({id})
+
+    if (!product) throw new NotFoundException(`Product with id ${id} is not found`)
+
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
