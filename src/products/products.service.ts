@@ -15,7 +15,7 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto): Promise<Product | undefined> {
     try {
       const product: Product = this.productRepository.create(createProductDto);
       await this.productRepository.save(product);
@@ -26,11 +26,11 @@ export class ProductsService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<Product[]> {
     return await this.productRepository.find({});
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Product> {
     const product: Product | null = await this.productRepository.findOneBy({id})
 
     if (!product) throw new NotFoundException(`Product with id ${id} is not found`)
@@ -42,11 +42,13 @@ export class ProductsService {
     return `This action updates a #${id} product`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string): Promise<void> {
+    const product: Product = await this.findOne(id);
+
+    await this.productRepository.remove(product);
   }
 
-  private handleExeptions(error: any) {
+  private handleExeptions(error: any): void {
     if (error?.code === '23505') {
       throw new BadRequestException(`${error?.detail}`)
     }
