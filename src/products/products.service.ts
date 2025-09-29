@@ -5,7 +5,7 @@ import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { validate as IsUUID} from 'uuid';
+import { validate as IsUUID } from 'uuid';
 
 @Injectable()
 export class ProductsService {
@@ -29,7 +29,7 @@ export class ProductsService {
   }
 
   async findAll(paginationDto: PaginationDto): Promise<Product[]> {
-    const { limit = 10, offset = 0} = paginationDto;
+    const { limit = 10, offset = 0 } = paginationDto;
     return await this.productRepository.find({
       take: limit,
       skip: offset
@@ -40,7 +40,7 @@ export class ProductsService {
     let product: Product | null;
 
     if (IsUUID(term)) {
-      product = await this.productRepository.findOneBy({id: term});
+      product = await this.productRepository.findOneBy({ id: term });
     } else {
       const queryBuilder = this.productRepository.createQueryBuilder();
       product = await queryBuilder.where('UPPER(title) =:title or slug =:slug', {
@@ -54,8 +54,15 @@ export class ProductsService {
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product | undefined> {
+    const product: Product | undefined = await this.productRepository.preload({ id, ...updateProductDto });
+
+    if (!product) throw new NotFoundException(`Product with id ${id} not found`)
+    try {
+      return this.productRepository.save(product);
+    } catch (error: any) {
+      this.handleExeptions(error);
+    }
   }
 
   async remove(id: string): Promise<void> {
