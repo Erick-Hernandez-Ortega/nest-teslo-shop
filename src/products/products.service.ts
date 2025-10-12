@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { validate as IsUUID } from 'uuid';
+import { ProductImage } from './entities/product-image.entity';
 
 @Injectable()
 export class ProductsService {
@@ -14,12 +15,15 @@ export class ProductsService {
   // Repository patron
   constructor(
     @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>
   ) { }
 
   async create(createProductDto: CreateProductDto): Promise<Product | undefined> {
     try {
-      const product: Product = this.productRepository.create(createProductDto);
+      const { images = [], ...productDetails } = createProductDto;
+      const product: Product = this.productRepository.create({...productDetails, images: images.map(image => this.productImageRepository.create({url: image}))});
       await this.productRepository.save(product);
 
       return product;
@@ -55,7 +59,7 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product | undefined> {
-    const product: Product | undefined = await this.productRepository.preload({ id, ...updateProductDto });
+    const product: Product | undefined = await this.productRepository.preload({ id, ...updateProductDto, images: [] });
 
     if (!product) throw new NotFoundException(`Product with id ${id} not found`)
     try {
