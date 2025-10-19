@@ -2,7 +2,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { DataSource, DeleteResult, QueryRunner, Repository } from 'typeorm';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { validate as IsUUID } from 'uuid';
@@ -102,6 +102,16 @@ export class ProductsService {
     const product: Product = await this.findOne(id);
 
     await this.productRepository.remove(product);
+  }
+
+  async removeAllProducts(): Promise<DeleteResult | undefined> {
+    const query = this.productRepository.createQueryBuilder('product');
+
+    try {
+      return await query.delete().where({}).execute();
+    } catch (error: unknown) {
+      this.handleExeptions(error);
+    }
   }
 
   private handleExeptions(error: any): void {
