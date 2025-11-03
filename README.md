@@ -6,3 +6,4 @@
 1. Levantar BD con docker
 ``` docker-compose up -d```
 2. rellenar las variables de entorno
+3. Ejecutar el seed
