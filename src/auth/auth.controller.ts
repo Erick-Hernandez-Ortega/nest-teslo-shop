@@ -10,6 +10,7 @@ import { UserRoleGuard } from './guards/user-role.guard';
 import { RoleProtected } from './decorators/role-protected.decorator';
 import { ValidRoles } from './interfaces/valid-roles';
 import { UserRole2Guard } from './guards/user-role2.guard';
+import { Auth } from './decorators/auth.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -50,6 +51,14 @@ export class AuthController {
   @RoleProtected(ValidRoles.admin)
   @UseGuards(AuthGuard(), UserRole2Guard)
   testingPrivateRoute3() {
+    return {
+      ok: true
+    }
+  }
+
+  @Get('private4')
+  @Auth(ValidRoles.admin)
+  testingPrivateRoute4() {
     return {
       ok: true
     }
