@@ -14,6 +14,8 @@ export class SeedService {
     return 'SEED EXECUTE'
   }
 
+  
+
   private async insertNewProducts(): Promise<void> {
     await this.productService.removeAllProducts();
 
@@ -21,9 +23,9 @@ export class SeedService {
 
     const insertPromises: Promise<Product>[] = [];
 
-    products.forEach(product => {
-      insertPromises.push(this.productService.create(product) as Promise<Product>);
-    });
+    // products.forEach(product => {
+    //   insertPromises.push(this.productService.create(product) as Promise<Product>);
+    // });
 
     await Promise.all(insertPromises);
   } 
